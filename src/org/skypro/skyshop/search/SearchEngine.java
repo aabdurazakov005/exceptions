@@ -2,52 +2,24 @@ package org.skypro.skyshop.search;
 
 import org.skypro.skyshop.articles.Searchable;
 
-public class SearchEngine {
-    private final Searchable[] searchables;
-    private int currentSize;
+import java.util.ArrayList;
+import java.util.List;
 
-    public SearchEngine(int capacity) {
-        this.searchables = new Searchable[capacity];
-    }
+public class SearchEngine {
+    private final List<Searchable> searchables = new ArrayList<>();
 
     public void add(Searchable searchable) {
-        if (currentSize < searchables.length) {
-            searchables[currentSize++] = searchable;
-        }
+        searchables.add(searchable);
     }
 
-    public Searchable findBestMatch(String search) throws BestResultNotFound {
-        if (search == null || search.isEmpty()) {
-            throw new BestResultNotFound(search);
-        }
-
-        Searchable bestMatch = null;
-        int maxCount = 0;
-
-        for (int i = 0; i < currentSize; i++) {
-            Searchable item = searchables[i];
-            if (item != null) {
-                int count = countSubstringOccurrences(item.getSearchTerm(), search);
-                if (count > maxCount) {
-                    maxCount = count;
-                    bestMatch = item;
-                }
+    public List<Searchable> search(String query) {
+        List<Searchable> results = new ArrayList<>();
+        for (Searchable item : searchables) {
+            if (item != null && item.getSearchTerm().toLowerCase()
+                    .contains(query.toLowerCase())) {
+                results.add(item);
             }
         }
-
-        if (bestMatch == null) {
-            throw new BestResultNotFound(search);
-        }
-        return bestMatch;
-    }
-
-    private int countSubstringOccurrences(String str, String sub) {
-        int count = 0;
-        int index = 0;
-        while ((index = str.indexOf(sub, index)) != -1) {
-            count++;
-            index += sub.length();
-        }
-        return count;
+        return results;
     }
 }

@@ -2,47 +2,43 @@ package org.skypro.skyshop;
 
 import org.skypro.skyshop.articles.Article;
 import org.skypro.skyshop.articles.Searchable;
+import org.skypro.skyshop.basket.ProductBasket;
 import org.skypro.skyshop.product.DiscountedProduct;
 import org.skypro.skyshop.product.FixPriceProduct;
 import org.skypro.skyshop.product.Product;
 import org.skypro.skyshop.product.SimpleProduct;
-import org.skypro.skyshop.search.BestResultNotFound;
 import org.skypro.skyshop.search.SearchEngine;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
-        // Демонстрация проверок
-        try {
-            new SimpleProduct(null, 100);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Ошибка: " + e.getMessage());
-        }
+        ProductBasket basket = new ProductBasket();
+        basket.addProduct(new SimpleProduct("Хлеб", 50));
+        basket.addProduct(new DiscountedProduct("Молоко", 100, 20));
+        basket.addProduct(new FixPriceProduct("Соль"));
+        basket.addProduct(new SimpleProduct("Хлеб", 50)); // Дубликат
 
-        try {
-            new DiscountedProduct("Чай", 100, 150);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+        System.out.println("= Удаление 'Хлеб' =");
+        List<Product> removed = basket.removeProductsByName("Хлеб");
+        if (removed.isEmpty()) {
+            System.out.println("Список пуст");
+        } else {
+            removed.forEach(p -> System.out.println(p.getName() + " удален."));
         }
+        basket.printBasketContents();
 
-        // Создание корректных продуктов
-        SearchEngine engine = new SearchEngine(10);
-        engine.add(new SimpleProduct("Молоко молоко молоко", 80));
-        engine.add(new SimpleProduct("Молоко", 90));
-        engine.add(new Article("О молоке", "Молоко полезно"));
+        System.out.println("= Удаление несуществующего продукта =");
+        List<Product> notFound = basket.removeProductsByName("Мясо");
+        System.out.println(notFound.isEmpty() ? "Список пуст." : "Продукты найдены.");
+        basket.printBasketContents();
 
-        // Демонстрация успешного поиска
-        try {
-            Searchable best = engine.findBestMatch("Молоко");
-            System.out.println("Лучший результат: " + best.getStringRepresentation());
-        } catch (BestResultNotFound e) {
-            System.out.println(e.getMessage());
-        }
+        SearchEngine engine = new SearchEngine();
+        engine.add(new SimpleProduct("Молоко", 80));
+        engine.add(new Article("О молоке", "Польза молока"));
+        engine.add(new SimpleProduct("Хлеб", 50));
 
-        // Демонстрация исключения при поиске
-        try {
-            engine.findBestMatch("Несуществующий");
-        } catch (BestResultNotFound e) {
-            System.out.println("Ошибка поиска: " + e.getMessage());
-        }
+        System.out.println("= Результаты поиска 'молоко' =");
+        List<Searchable> results = engine.search("молоко");
+        results.forEach(r -> System.out.println(r.getStringRepresentation()));
     }
 }
