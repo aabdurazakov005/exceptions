@@ -3,22 +3,36 @@ package org.skypro.skyshop.basket;
 
 import org.skypro.skyshop.product.Product;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class ProductBasket {
-    private final Product[] products = new Product[5];
+    private final List<Product> products = new ArrayList<>();
     private int count = 0;
 
     public void addProduct(Product product) {
-        if (count >= products.length) {
-            System.out.println("Невозможно добавить продукт");
-            return;
+        products.add(product);
+    }
+
+    public List<Product> removeProductsByName(String name) {
+        List<Product> removed = new ArrayList<>();
+        Iterator<Product> iterator = products.iterator();
+
+        while (iterator.hasNext()) {
+            Product product = iterator.next();
+            if (product.getName().equalsIgnoreCase(name)) {
+                removed.add(product);
+                iterator.remove();
+            }
         }
-        products[count++] = product;
+        return removed;
     }
 
     public int getTotalPrice() {
         int total = 0;
         for (int i = 0; i < count; i++) {
-            total += products[i].getPrice();
+            total += products.get(i).getPrice();
         }
         return total;
     }
@@ -31,8 +45,8 @@ public class ProductBasket {
 
         int specialCount = 0;
         for (int i = 0; i < count; i++) {
-            System.out.println(products[i].toString());
-            if (products[i].isSpecial()) {
+            System.out.println(products.get(i).toString());
+            if (products.get(i).isSpecial()) {
                 specialCount++;
             }
         }
@@ -42,7 +56,7 @@ public class ProductBasket {
 
     public boolean containsProduct(String productName) {
         for (int i = 0; i < count; i++) {
-            if (products[i].getName().equalsIgnoreCase(productName)) {
+            if (products.get(i).getName().equalsIgnoreCase(productName)) {
                 return true;
             }
         }
@@ -51,7 +65,7 @@ public class ProductBasket {
 
     public void clearBasket() {
         for (int i = 0; i < count; i++) {
-            products[i] = null;
+            products.set(i, null);
         }
         count = 0;
     }
