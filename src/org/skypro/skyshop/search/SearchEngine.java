@@ -3,7 +3,10 @@ package org.skypro.skyshop.search;
 import org.skypro.skyshop.articles.Searchable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SearchEngine {
     private final List<Searchable> searchables = new ArrayList<>();
@@ -12,14 +15,16 @@ public class SearchEngine {
         searchables.add(searchable);
     }
 
-    public List<Searchable> search(String query) {
-        List<Searchable> results = new ArrayList<>();
-        for (Searchable item : searchables) {
-            if (item != null && item.getSearchTerm().toLowerCase()
-                    .contains(query.toLowerCase())) {
-                results.add(item);
-            }
-        }
-        return results;
+    public Map<String, Searchable> search(String query) {
+        return searchables.stream()
+                .filter(item -> item != null &&
+                        item.getSearchTerm().toLowerCase().contains(query.toLowerCase()))
+                .sorted(Comparator.comparing(Searchable::getName))
+                .collect(Collectors.toMap(
+                        Searchable::getName,
+                        item -> item,
+                        (existing, replacement) -> existing
+                ));
     }
+
 }
