@@ -2,29 +2,33 @@ package org.skypro.skyshop.search;
 
 import org.skypro.skyshop.articles.Searchable;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.*;
 
 public class SearchEngine {
-    private final List<Searchable> searchables = new ArrayList<>();
+    private final Set<Searchable> searchables = new HashSet<>();
 
     public void add(Searchable searchable) {
-        searchables.add(searchable);
+        if (searchable != null) {
+            searchables.add(searchable);
+        }
     }
 
-    public Map<String, Searchable> search(String query) {
+    public Set<Searchable> search(String query) {
+        if (query == null || query.isBlank()) {
+            return Collections.emptySortedSet();
+        }
+
+        String lowerQuery = query.toLowerCase();
+
+        Comparator<Searchable> lengthThenNaturalComparator = Comparator
+                .comparingInt((Searchable s) -> s.getName().length())
+                .reversed()
+                .thenComparing(Searchable::getName);
+
         return searchables.stream()
-                .filter(item -> item != null &&
-                        item.getSearchTerm().toLowerCase().contains(query.toLowerCase()))
-                .sorted(Comparator.comparing(Searchable::getName))
-                .collect(Collectors.toMap(
-                        Searchable::getName,
-                        item -> item,
-                        (existing, replacement) -> existing
-                ));
+                .filter(item -> item.getSearchTerm().toLowerCase().contains(lowerQuery))
+                .collect(Collectors.toCollection(() -> new TreeSet<>(lengthThenNaturalComparator)));
     }
-
 }
